@@ -119,6 +119,8 @@ After a while, go to IoT Hub resource in Azure Portal. Click IoT Edge device and
 In this deployment, the spatial analysis container will read the stream of [this video](https://teamfileshare.blob.core.windows.net/spatialanalysis-demo-data/line-crossing.mp4?sp=r&st=2021-04-26T22:53:17Z&se=2024-04-27T06:53:17Z&spr=https&sv=2020-02-10&sr=b&sig=sfy4Z%2BQPnMnL2wqA5F0Mw0VVGIoqHG1vtr0IhvhqCuI%3D), instead of RTSP inputs (camera inputs).<br>
 By Spatial analysis configuration in deployment.json (see ```SPACEANALYTICS_CONFIG```), the spatial analysis container will track the person's line-crossing events in this video.
 
+> Note : To use video recording, make sure to set ```VIDEO_IS_LIVE``` to false in Spatial analysis configuration.
+
 After the event is triggered, these events will be passed into Edge Hub in device. (See above architecture.)<br>
 These events will then be transferred into testmodule by message routing's setting in deployment.json (see ```routes```).
 
@@ -138,7 +140,5 @@ Received - b'{"events": [{"id": ...
 Received - b'{"events": [{"id": ...
 ...
 ```
-
-> Note : To use video recording, make sure to set ```VIDEO_IS_LIVE``` to false in Spatial analysis configuration.
 
 *Tsuyoshi Matsuzaki @ Microsoft*
