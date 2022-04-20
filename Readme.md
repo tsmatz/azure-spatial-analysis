@@ -50,7 +50,7 @@ sudo apt-get install -y docker-ce nvidia-docker2
 sudo systemctl restart docker
 ```
 
-### Install IoT Edge runtime in Edge device
+### Install IoT Edge runtime in Edge device (Ubuntu VM)
 
 Install IoT Edge runtime as follows.
 
