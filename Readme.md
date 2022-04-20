@@ -1,6 +1,6 @@
 # Azure Computer Vision - Spatial Analysis Tutorial
 
-In this tutorial, we deploy Azure Spatial Analysis container (module) in Edge device, and handle the tracked events in custom container (custom module).
+In this tutorial, we deploy Azure Spatial Analysis container (module) in Edge device, and handle the captured events in custom container (custom module).
 
 ![tutorial architecture](images/architecture.png?raw=true)
 
@@ -10,21 +10,21 @@ Before starting, please read [here](https://tsmatz.wordpress.com/2019/10/19/azur
 
 Create IoT Hub resource in Azure Portal.
 
-## Set up Edge device
+## Create and set up Edge device
 
 For running Spatial Analysis conatiner, you should prepare a device with NVIDIA GPU 6.0 or above.<br>
-Here we use Ubuntu virtual machine (with GPU) for Edge device.
+In this example, we use Ubuntu virtual machine (with GPU) for Edge device.
 
-First, create "Ubuntu Server 18.04 LTS" resource with GPU-utilized VM in Azure Portal. In my case, I have used Standard NC6 (NVIDIA Tesla K80) with Gen 1 Ubuntu image.
+First, create "Ubuntu Server 18.04 LTS" resource with GPU-utilized instance in Azure Portal. In my case, I have created a Standard NC6 (NVIDIA Tesla K80) VM with Gen 1 Ubuntu image.
 
-Next set up IoT Edge runtime with NVIDIA GPU drivers as follows.
+Next, install and set up IoT Edge runtime with NVIDIA GPU drivers as follows.
 
 ### Install GPU driver
 
-Install NVIDIA CUDA driver in this VM (virtual machine).<br>
-The simple way to install is to add "NVIDIA GPU Driver Extension" in VM. (Select "Extensions and applications" menu in blade and add this extension.)
+Install NVIDIA CUDA driver in this VM (Edge device).<br>
+The simple way to install GPU drivers is to add "NVIDIA GPU Driver Extension" for VM in Azure Portal. (Select "Extensions and applications" menu in blade and then add this extension.)
 
-> Note : After the installation is completed, please make sure by running ```nvidia-smi```.
+> Note : After the driver's installation is completed, please check if the driver is enabled by running ```nvidia-smi``` command.
 
 ### Install docker runtime with nvidia-docker2
 
@@ -39,7 +39,7 @@ sudo apt-get update
 sudo apt-get install -y docker-ce docker-ce-cli containerd.io
 ```
 
-After installation, install nvidia-docker2 and restart docker runtime.
+Next, install nvidia-docker2 and restart docker runtime.
 
 ```
 distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
@@ -50,7 +50,7 @@ sudo apt-get install -y docker-ce nvidia-docker2
 sudo systemctl restart docker
 ```
 
-### Install IoT Edge runtime
+### Install IoT Edge runtime in Edge device
 
 Install IoT Edge runtime as follows.
 
@@ -63,22 +63,25 @@ sudo apt-get update
 sudo apt-get install iotedge=1.0.9* libiothsm-std=1.0.9*
 ```
 
-## Connect Edge device to IoT Hub
+## Connect your Edge device to IoT Hub
 
-Connect your Edge device (Ubuntu VM) to IoT Hub in cloud.
+Connect your Edge device (Ubuntu VM) to IoT Hub in cloud as follows.
 
-1. Go to Azure Portal and add an IoT Edge device entry in your IoT Hub resource.
+1. Go to Azure Portal and go to IoT Hub resource. Click "IoT Edge" menu and add an IoT Edge device (Edge-enabled device) entry in your IoT Hub resource.
 2. Get connection string in the generated IoT Edge device entry.
-3. Set this connection string in the file /etc/iotedge/config.yaml on Edge device (Ubuntu VM).
-4. Restart IoT Edge runtime by running ```sudo systemctl restart iotedge``` in Edge device (Ubuntu VM).
+3. Login to Edge device (Ubuntu VM) and set this connection string in the file ```/etc/iotedge/config.yaml```.
+4. Restart IoT Edge runtime by running<br>
+```sudo systemctl restart iotedge```<br>
+in Edge device (Ubuntu VM).
 
-## Set up working client (Ubuntu VM)
+## Create and set up working client (Ubuntu VM)
 
-For the final setup, please prepare the working client. In this tutorial, we also use Ubuntu VM (Ubuntu Server 18.04 LTS) for this machine. (You can also use Windows or MacOS for working client.)
+For the final setup, please provision your working client.<br>
+You can also use Windows or MacOS for working client, but in this tutorial, we also use Ubuntu VM (Ubuntu Server 18.04 LTS) for the client.
 
-First, create "Ubuntu Server 18.04 LTS" resource in Azure Portal. (GPU is not needed for this machine.)
+First, create "Ubuntu Server 18.04 LTS" resource in Azure Portal. (GPU is not needed for this client's machine.)
 
-Login to this machine and install ```az``` command as follows.
+Login to this machine (client) and install ```az``` command as follows.
 
 ```
 curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
@@ -92,16 +95,17 @@ az extension add --name azure-iot
 
 ## Create computer vision resource
 
-Create computer vision resource in Azure Portal. Make sure to set "Standard S1" for tier.
+Create computer vision resource in Azure Portal. Make sure to set "Standard S1" in pricing tier.
 
-After the resouce is created, go to "Keys and Endpoint" menu and copy endpoint and primary key. These are used for Spatial Analysis container.
+After the resouce is created, click "Keys and Endpoint" menu and then copy endpoint and primary key. (These are used for Spatial Analysis container as follows.)
 
 ## Deploy modules
 
-Now deploy modules (containers) in Edge device (Ubuntu VM with GPU) as follows.
+Now let's deploy modules (containers) in your Edge device (GPU-utilized Ubuntu VM) as follows.
 
-Open [deployment.json](./deployment.json), and fill endpoint (see above) in "BILLING" section and fill primary key in "APIKEY" section.<br>
-And run the following command in working client (Ubuntu).
+Before deployment, open [deployment.json](./deployment.json), and fill the endpoint address for computer vision resource (see above) in "BILLING" environment on spatial analysis module. Also, fill primary key (see above) in "APIKEY" environment.
+
+To deploy modules in your Edge device (Ubuntu VM) thru IoT Hub, copy ```deployment.json``` in your working client and run the following command. (Replace the following ```{YOUR IOT HUB NAME}``` and ```{YOUR DEVICE ID}``` with yours.)
 
 ```
 az iot edge set-modules \
@@ -110,28 +114,29 @@ az iot edge set-modules \
   --content ./deployment.json
 ```
 
-After a while, go to IoT Hub resource in Azure Portal. Click IoT Edge device and make sure that all modules are correctly running. (See below.)
+After a while, go to IoT Hub resource in Azure Portal and click "IoT Edge" menu.<br>
+Click and see your IoT Edge device, and make sure that all modules are correctly running. (See below.)
 
 ![modules](images/modules.png?raw=true)
 
 ## Check results
 
-In this deployment, the spatial analysis container will read the stream of [this video](https://teamfileshare.blob.core.windows.net/spatialanalysis-demo-data/line-crossing.mp4?sp=r&st=2021-04-26T22:53:17Z&se=2024-04-27T06:53:17Z&spr=https&sv=2020-02-10&sr=b&sig=sfy4Z%2BQPnMnL2wqA5F0Mw0VVGIoqHG1vtr0IhvhqCuI%3D) (which is also used in Spatial Analysis tutorial in official document), instead of RTSP inputs (camera inputs).<br>
-By Spatial analysis configuration in deployment.json (see ```SPACEANALYTICS_CONFIG```), the spatial analysis container will track the person's line-crossing events in this video.
+In this tutorial, the spatial analysis container (module) will read the stream of [this video file](https://teamfileshare.blob.core.windows.net/spatialanalysis-demo-data/line-crossing.mp4?sp=r&st=2021-04-26T22:53:17Z&se=2024-04-27T06:53:17Z&spr=https&sv=2020-02-10&sr=b&sig=sfy4Z%2BQPnMnL2wqA5F0Mw0VVGIoqHG1vtr0IhvhqCuI%3D) (which is also used in Spatial Analysis tutorial in official document), instead of RTSP endpoint (camera inputs).<br>
+By Spatial analysis configuration in deployment.json (see ```SPACEANALYTICS_CONFIG``` in [deployment.json](./deployment.json)), the spatial analysis container will capture the person's line-crossing events in this video.
 
-> Note : To use video recording, make sure to set ```VIDEO_IS_LIVE``` to false in Spatial analysis configuration.
+> Note : To use video recording in Spatial Analysis, make sure to set ```VIDEO_IS_LIVE``` to false in configuration.
 
-After the event is triggered, these events will be passed into Edge Hub in device. (See above architecture.)<br>
-These events will then be transferred into testmodule by message routing's setting in deployment.json (see ```routes```).
+After the event is triggered, these events will be passed into Edge Hub in device. (See above illustrated architecture.)<br>
+These events will then be transferred into testmodule (custom module) by message routing setting (see ```routes```) in deployment.json.
 
-This testmodule will then outputs the received messages in container logs. (You can see the source code of this module in [here](https://tsmatz.wordpress.com/2019/10/19/azure-iot-hub-iot-edge-module-container-tutorial-with-message-route/).)<br>
+This testmodule will then just output the received messages in container logs. (You can see the source code of this module in [here](https://tsmatz.wordpress.com/2019/10/19/azure-iot-hub-iot-edge-module-container-tutorial-with-message-route/).)<br>
 You can then see the received messages by running the following command in Edge device (Ubuntu VM).
 
 ```
 sudo iotedge logs testmodule
 ```
 
-You can then see the following outputs, which are the messages passed by Spatial Analysis.
+The following outputs (which are messages passed by Spatial Analysis) will be shown.
 
 ```
 Received - b'{"events": [{"id": ...
@@ -141,7 +146,7 @@ Received - b'{"events": [{"id": ...
 ...
 ```
 
-Please change video and configuration for Spatial Analysis, and see how message is changed in the logs. (This testmodule can be used for debugging.)
+Please change video file and configuration in deployment.json, and see how message is changed in the logs. (This testmodule (custom module) can be used for debugging.)
 
 > Note : You can also use diagnostics and telegraf containers in Spatial Analysis for logging and monitoring in Azure Monitor.
 
