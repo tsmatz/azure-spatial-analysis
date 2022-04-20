@@ -103,7 +103,7 @@ After the resouce is created, click "Keys and Endpoint" menu and then copy endpo
 
 Now let's deploy modules (containers) in your Edge device (GPU-utilized Ubuntu VM) as follows.
 
-Before deployment, open [deployment.json](./deployment.json), and fill the endpoint address for computer vision resource (see above) in "BILLING" environment on spatial analysis module. Also, fill primary key (see above) in "APIKEY" environment.
+Before deployment, open [deployment.json](./deployment.json), and fill the endpoint address for computer vision resource (see above) in "```BILLING```" environment on spatial analysis module. Also, fill primary key (see above) in "```APIKEY```" environment.
 
 To deploy modules in your Edge device (Ubuntu VM) thru IoT Hub, copy ```deployment.json``` in your working client and run the following command. (Replace the following ```{YOUR IOT HUB NAME}``` and ```{YOUR DEVICE ID}``` with yours.)
 
