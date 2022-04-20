@@ -10,7 +10,7 @@ Before starting, please read [here](https://tsmatz.wordpress.com/2019/10/19/azur
 
 Create IoT Hub resource in Azure Portal.
 
-## 2. Create and set up Edge device
+## 2. Create and set up Edge device (Ubuntu VM)
 
 For running Spatial Analysis conatiner, you should prepare a device with NVIDIA GPU 6.0 or above.<br>
 In this example, we use Ubuntu virtual machine (with GPU) for Edge device.
@@ -50,7 +50,7 @@ sudo apt-get install -y docker-ce nvidia-docker2
 sudo systemctl restart docker
 ```
 
-### Install IoT Edge runtime in Edge device (Ubuntu VM)
+### Install IoT Edge runtime in Edge device
 
 Install IoT Edge runtime as follows.
 
