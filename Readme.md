@@ -127,7 +127,7 @@ By Spatial analysis configuration in deployment.json (see ```SPACEANALYTICS_CONF
 > Note : To use video recording in Spatial Analysis, make sure to set ```VIDEO_IS_LIVE``` to false in configuration.
 
 After the event is triggered, these events will be passed into Edge Hub in device. (See above illustrated architecture.)<br>
-These events will then be transferred into testmodule (custom module) by message routing setting (see ```routes```) in deployment.json.
+These events will then be transferred into testmodule (custom module) by message routing's setting (see ```routes```) in deployment.json.
 
 This testmodule will then just output the received messages in container logs. (You can see the source code of this module in [here](https://tsmatz.wordpress.com/2019/10/19/azure-iot-hub-iot-edge-module-container-tutorial-with-message-route/).)<br>
 You can then see the received messages by running the following command in Edge device (Ubuntu VM).
