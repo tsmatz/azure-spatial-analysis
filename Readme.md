@@ -19,14 +19,14 @@ First, create "Ubuntu Server 18.04 LTS" resource with GPU-utilized instance in A
 
 Next, install and set up IoT Edge runtime with NVIDIA GPU drivers as follows.
 
-### Install GPU driver
+### 1. Install GPU driver
 
 Install NVIDIA CUDA driver in this VM (Edge device).<br>
 The simple way to install GPU drivers is to add "NVIDIA GPU Driver Extension" for VM in Azure Portal. (Select "Extensions and applications" menu in blade and then add this extension.)
 
 > Note : After the driver's installation is completed, please check if the driver is enabled by running ```nvidia-smi``` command.
 
-### Install docker runtime with nvidia-docker2
+### 2. Install docker runtime with nvidia-docker2
 
 Install docker runtime (docker-ce) as follows.
 
@@ -50,7 +50,7 @@ sudo apt-get install -y docker-ce nvidia-docker2
 sudo systemctl restart docker
 ```
 
-### Install IoT Edge runtime in Edge device
+### 3. Install IoT Edge runtime in Edge device
 
 Install IoT Edge runtime as follows.
 
