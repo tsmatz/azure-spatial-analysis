@@ -97,13 +97,50 @@ az extension add --name azure-iot
 
 Create computer vision resource in Azure Portal. Make sure to set "Standard S1" in pricing tier.
 
-After the resouce is created, click "Keys and Endpoint" menu and then copy endpoint and primary key. (These are used for Spatial Analysis container as follows.)
+After the resouce is created, click "Keys and Endpoint" menu and then copy endpoint and primary key. (These are used for Spatial Analysis container deployment.)
+
+![cognitive services endpoint and key](images/endpoint_and_key.png?raw=true)
 
 ## 6. Deploy modules
 
 Now let's deploy modules (containers) in your Edge device (GPU-utilized Ubuntu VM) as follows.
 
 Before deployment, open [deployment.json](./deployment.json), and fill the endpoint address for computer vision resource (see above) in "```BILLING```" environment on spatial analysis module. Also, fill primary key (see above) in "```APIKEY```" environment.
+
+```
+{
+  "modulesContent": {
+    "$edgeAgent": {
+      "properties.desired": {
+        ...
+
+        "modules": {
+          "spatialanalysis": {
+            "settings": { ... },
+            "type": "docker",
+            "env": {
+              ...
+
+              "BILLING":{
+                "value": "<Use endpoint from Computer Vision Azure resource>"
+              },
+              "APIKEY":{
+                "value": "<Use the key from Computer Vision Azure resource>"
+              },
+              ...
+
+            }
+          },
+          ...
+
+        }
+      }
+    },
+    ...
+
+  }
+}
+```
 
 To deploy modules in your Edge device (Ubuntu VM) thru IoT Hub, copy ```deployment.json``` in your working client and run the following command. (Replace the following ```{YOUR IOT HUB NAME}``` and ```{YOUR DEVICE ID}``` with yours.)
 
@@ -115,7 +152,8 @@ az iot edge set-modules \
 ```
 
 After a while, go to IoT Hub resource in Azure Portal and click "IoT Edge" menu.<br>
-Click and see your IoT Edge device, and make sure that all modules are correctly running. (See below.)
+Click and see your IoT Edge device, and make sure that all modules are correctly running.<br>
+(It will take tens of minutes for the installation of spatial analysis container.)
 
 ![modules](images/modules.png?raw=true)
 
@@ -146,7 +184,117 @@ Received - b'{"events": [{"id": ...
 ...
 ```
 
-Please change video file and configuration in deployment.json, and see how message is changed in the logs. (This testmodule (custom module) can be used for debugging.)
+Please change video file or configuration in deployment.json, and see how message is changed.
+
+## 8. [Optional] Debug with X Display
+
+For the debugging purpose, you can also see how it detects with Spatial analysis visualizer. (See below.) With this visualizer, you can check whether your coordinate's configuration fits to the captured screen.
+
+![visualizer](images/visualizer.png?raw=true)
+
+In the last part of this tutorial, I'll show you how to enable this visualizer.<br>
+In this example, we are using Ubuntu Server 18.04 LTS for IoT Edge device. To simplify configuration, here we use X display with this host and remote desktop client in Windows.
+
+In order to install X remote desktop components, login to your Edge device (GPU-utilized Ubuntu) and run the following commands.<br>
+
+```
+sudo apt-get install -y lxde
+sudo apt-get install -y xrdp
+```
+
+Now, start RDP service as follows. (You should fill the password for start daemon.)<br>
+After this setting, restart your Edge device computer (Ubuntu).
+
+```
+/etc/init.d/xrdp start  # password is required
+```
+
+After the computer (Ubuntu) is restarted, open port 3389 and connect to this computer with remote desktop client in your local Windows.<br>
+To get display id, open terminal (such as LXTerminal) and run as follows.
+
+```
+env | grep DISPLAY
+```
+
+Next, run the following command to make remote X clients to connect this device from any host.
+
+```
+xhost +
+```
+
+Same as you have changed in deployment.json, open [deployment_debug.json](./deployment_debug.json) and fill "```BILLING```" and "```APIKEY```" environments in spatial analysis configuration.<br>
+Futhermore, please fill X display id (which is copied in above) in ```DISPLAY``` environment setting, as well.
+
+```
+{
+  "modulesContent": {
+    "$edgeAgent": {
+      "properties.desired": {
+        ...
+
+        "modules": {
+          "spatialanalysis": {
+            "settings": { ... },
+            "type": "docker",
+            "env": {
+              "DISPLAY": {
+                "value": "<Fill display id>"
+              },
+              ...
+
+              "BILLING":{
+                "value": "<Use endpoint from Computer Vision Azure resource>"
+              },
+              "APIKEY":{
+                "value": "<Use the key from Computer Vision Azure resource>"
+              },
+              ...
+
+            }
+          },
+          ...
+
+        }
+      }
+    },
+    ...
+
+  }
+}
+```
+
+In this new deployment configuration (deployment_debug.json), the following 3 settings are changed for visualization and debugging.
+
+- Set your X remote display id in ```DISPLAY``` environment. (See above.)
+- Set debug version of operation id (```cognitiveservices.vision.spatialanalysis.debug```) in ```operationId``` entry.
+- Added the following entry in spatial analysis configuration.<br>
+  ```"VISUALIZER_NODE_CONFIG": "{ \"show_debug_video\": true }"```
+
+Now, login to your working client (Ubuntu) and deploy modules with this new deployment configuration (deployment_debug.json).
+
+```
+az iot edge set-modules \
+  --hub-name {YOUR IOT HUB NAME} \
+  --device-id {YOUR DEVICE ID} \
+  --content ./deployment_debug.json
+```
+
+In your remote desktop client (logging in Edge device's host), copy ```.Xauthority``` into spatial analysis container.
+
+```
+sudo docker cp .Xauthority spatialanalytics:/root/.Xauthority
+```
+
+Now let's restart spatial analysis container.
+
+```
+sudo docker stop spatialanalytics
+sudo docker start spatialanalytics
+```
+
+When you restart container, the visualizer will launch in your remote X display.<br>
+
+![visualizer](images/visualizer.png?raw=true)
 
 > Note : You can also use diagnostics and telegraf containers in Spatial Analysis for logging and monitoring in Azure Monitor.
 
