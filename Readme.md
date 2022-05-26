@@ -282,14 +282,14 @@ az iot edge set-modules \
 In your remote desktop client (logging in Edge device's host), copy ```.Xauthority``` into spatial analysis container.
 
 ```
-sudo docker cp .Xauthority spatialanalytics:/root/.Xauthority
+sudo docker cp .Xauthority spatialanalysis:/root/.Xauthority
 ```
 
 Now let's restart spatial analysis container.
 
 ```
-sudo docker stop spatialanalytics
-sudo docker start spatialanalytics
+sudo docker stop spatialanalysis
+sudo docker start spatialanalysis
 ```
 
 When you restart container, the visualizer will launch in your remote X display.<br>
