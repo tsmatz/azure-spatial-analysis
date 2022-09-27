@@ -157,6 +157,8 @@ Click and see your IoT Edge device, and make sure that all modules are correctly
 
 ![modules](images/modules.png?raw=true)
 
+> Note : Wait around 10 minutes. If you encounter the errors, please see [here](https://netweblog.wordpress.com/2019/03/30/azure-iot-edge-module-error-trouble-shoot/) for debugging.
+
 ## 7. Check events
 
 In this tutorial, the spatial analysis container (module) will read the stream of [this video file](https://teamfileshare.blob.core.windows.net/spatialanalysis-demo-data/line-crossing.mp4?sp=r&st=2021-04-26T22:53:17Z&se=2024-04-27T06:53:17Z&spr=https&sv=2020-02-10&sr=b&sig=sfy4Z%2BQPnMnL2wqA5F0Mw0VVGIoqHG1vtr0IhvhqCuI%3D) (which is also used in Spatial Analysis tutorial in official document), instead of RTSP endpoint (camera inputs).<br>
